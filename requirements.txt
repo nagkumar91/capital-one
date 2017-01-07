@@ -1,0 +1,2 @@
+click==6.7
+pymongo==3.4.0
