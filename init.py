@@ -1,6 +1,6 @@
 import json
 import os
-
+from datetime import datetime
 import click
 import requests
 USER_ID = os.environ.get("USER_ID", None)
@@ -41,7 +41,9 @@ def download_and_insert(transactions):
         click.echo("Response received from API")
         if json_response['error'] == 'no-error':
             for row in json_response['transactions']:
-                id = transactions.insert_one(row).inserted_id
+                date = datetime.strptime(row['transaction-time'], "%Y-%m-%dT%H:%M:%S.%fZ")
+                row['transaction-time'] = date
+                transactions.insert_one(row)
         click.echo("Inserted %s documents" % transactions.count())
     else:
         click.echo("Something went wrong. Please check tokens and try again.")
