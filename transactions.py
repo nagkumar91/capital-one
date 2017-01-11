@@ -123,14 +123,11 @@ def get_income_and_expenditure_for_month(month, year, all_transactions):
 
 
 @click.command()
-@click.option('--ignore-donuts', is_flag=True, default=False)
-@click.option('--crystal-ball', is_flag=True, default=False)
+@click.option('--ignore-donuts', is_flag=True, default=False, help="ignores all the transactions for donuts")
+@click.option('--crystal-ball', is_flag=True, default=False, help="appends the list with predicted transactions.")
 def transactions(ignore_donuts, crystal_ball):
     """
-    Driver method.
-    :param ignore_donuts: if true, ignores donut transactions
-    :param crystal_ball: if true, gets the predicted transactions for current month and includes it in the average
-    :return: prints the income and expenditure for every month and average for all the months
+    This script pulls data from Capital One API and aggregates transactions for every month and displays the result.
     """
     all_transactions = get_all_transactions(ignore_donuts)
     if crystal_ball:
