@@ -43,6 +43,12 @@ def download_and_insert(transactions):
             for row in json_response['transactions']:
                 date = datetime.strptime(row['transaction-time'], "%Y-%m-%dT%H:%M:%S.%fZ")
                 row['transaction-time'] = date
+                amount = None
+                income = False
+                if row['amount'] > 0:
+                    income = True
+                row['is_income'] = income
+                row['_id'] = row['transaction-id']
                 transactions.insert_one(row)
         click.echo("Inserted %s documents" % transactions.count())
     else:
