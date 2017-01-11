@@ -4,6 +4,7 @@ import os
 import click
 import requests
 from datetime import datetime
+from dateutil.rrule import rrule, MONTHLY
 
 USER_ID = os.environ.get("USER_ID", None)
 AUTH_TOKEN = os.environ.get("AUTH_TOKEN", None)
@@ -81,9 +82,10 @@ def get_income_and_expenditure_for_month(month, year, all_transactions):
 @click.command()
 def transactions():
     all_transactions = get_all_transactions()
-    print len(all_transactions)
-    print type(all_transactions)
-    print get_income_and_expenditure_for_month(11, 2014, all_transactions)
+    start_date = datetime(2014, 10, 01)
+    end_date = datetime(2017, 02, 01)
+    for date in rrule(MONTHLY, dtstart=start_date, until=end_date):
+        print "%s: %s" % (date.strftime("%Y-%m-%d"), get_income_and_expenditure_for_month(date.month, date.year, all_transactions))
 
 
 if __name__ == '__main__':
