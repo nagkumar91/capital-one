@@ -12,6 +12,10 @@ API_TOKEN = os.environ.get("API_TOKEN", None)
 
 
 def prepare_request():
+    """
+    Method to prepare headers and args for request
+    :return: Headers and body for the request
+    """
     if USER_ID:
         user_id = USER_ID
     else:
@@ -41,6 +45,11 @@ def prepare_request():
 
 
 def get_all_transactions(ignore_donuts):
+    """
+    Gets all the transactions from the API
+    :param ignore_donuts: if true, ignores all the transactions at krispy kreme and dunkin.
+    :return: returns all the transactions as a list
+    """
     headers, data = prepare_request()
     response = requests.post("https://2016.api.levelmoney.com/api/v2/core/get-all-transactions", data=json.dumps(data),
                              headers=headers)
@@ -60,6 +69,12 @@ def get_all_transactions(ignore_donuts):
 
 
 def add_crystal_ball_transactions(all_transactions, ignore_donuts):
+    """
+    Gets the projected transactions for the current month (hardcoded as 01,2017)
+    :param all_transactions: Previously downloaded transactions from all transactions API
+    :param ignore_donuts: if true, ignores all the transactions at krispy kreme and dunkin.
+    :return: Returns the list of all transactions with the newly downlaoded transactions appened to it
+    """
     headers, data = prepare_request()
     data['month'] = 1
     data['year'] = 2017
@@ -81,6 +96,13 @@ def add_crystal_ball_transactions(all_transactions, ignore_donuts):
 
 
 def get_income_and_expenditure_for_month(month, year, all_transactions):
+    """
+    Primary aggregator function which calculates the income and expenditure for a given month
+    :param month: month for the transactions to be filtered on
+    :param year: year for the transactions to be filtered on
+    :param all_transactions: list of all the downloaded transactions
+    :return: income and expenditure for the current month
+    """
     income = expenditure = 0
     for transaction in all_transactions:
         # check for date
@@ -104,6 +126,12 @@ def get_income_and_expenditure_for_month(month, year, all_transactions):
 @click.option('--ignore-donuts', is_flag=True, default=False)
 @click.option('--crystal-ball', is_flag=True, default=False)
 def transactions(ignore_donuts, crystal_ball):
+    """
+    Driver method.
+    :param ignore_donuts: if true, ignores donut transactions
+    :param crystal_ball: if true, gets the predicted transactions for current month and includes it in the average
+    :return: prints the income and expenditure for every month and average for all the months
+    """
     all_transactions = get_all_transactions(ignore_donuts)
     if crystal_ball:
         all_transactions = add_crystal_ball_transactions(all_transactions, ignore_donuts)
