@@ -50,33 +50,22 @@ def get_all_transactions():
 
 
 def get_income_and_expenditure_for_month(month, year, all_transactions):
-    income = expenditure = income_count = expenditure_count = 0
+    income = expenditure = 0
     for transaction in all_transactions:
         # check for date
-        # transaction_date = datetime.strptime(transaction['transaction-time'], "%Y-%m-%dT%H:%M:%S.%fZ")
         transaction_date = transaction['transaction-time']
         if transaction_date.month == month and transaction_date.year == year:
             # date is within our year and month
             # check if it is income or expenditure
             if transaction['amount'] > 0:
                 # transaction is an income if amount > 0
-                income_count += 1
                 income += round(float(transaction['amount'] / 10000), 2)
             else:
                 # transaction is an expenditure
-                expenditure_count += 1
                 expenditure += round(float((transaction['amount'] * -1) / 10000), 2)
-    avg_income = 0
-    avg_expenditure = 0
-    if expenditure_count:
-        avg_expenditure = round(float(expenditure) / expenditure_count, 2)
-    if income_count:
-        avg_income = round(float(income) / income_count, 2)
     return {
         "income": income,
-        "expenditure": expenditure,
-        "avg_expenditure": avg_expenditure,
-        "avg_income": avg_income
+        "expenditure": expenditure
     }
 
 
@@ -88,8 +77,7 @@ def transactions():
     all_transactions_for_averages = []
     for date in rrule(MONTHLY, dtstart=start_date, until=end_date):
         values_for_current_month = get_income_and_expenditure_for_month(date.month, date.year, all_transactions)
-        print "%s: {'income': %s, 'expenditure': %s}" % (date.strftime("%Y-%m-%d"), values_for_current_month['income'],
-                                                         values_for_current_month['expenditure'])
+        print "%s: %s" % (date.strftime("%Y-%m-%d"), values_for_current_month)
         all_transactions_for_averages.append(values_for_current_month)
     print "Average income: %s" % round(
         float(sum(t['income'] for t in all_transactions_for_averages)) / len(all_transactions_for_averages), 2)
