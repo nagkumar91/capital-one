@@ -17,3 +17,9 @@ pip install -r requirements.txt
 python transactions.py --help
 ```
 4. Run the script with appropriate option(s)
+5. You can also set up the args for the API from the environment instead of typing it in everytime.
+```
+export USER_ID=<value for user id without enclosing brackets>
+export AUTH_TOKEN=<value for user id without enclosing brackets>
+export API_TOKEN=<value for user id without enclosing brackets>
+```
