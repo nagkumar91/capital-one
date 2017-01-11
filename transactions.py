@@ -11,7 +11,7 @@ AUTH_TOKEN = os.environ.get("AUTH_TOKEN", None)
 API_TOKEN = os.environ.get("API_TOKEN", None)
 
 
-def get_all_transactions():
+def get_all_transactions(ignore_donuts):
     if USER_ID:
         user_id = USER_ID
     else:
@@ -41,10 +41,15 @@ def get_all_transactions():
                              headers=headers)
     if response.status_code == 200:
         json_response = response.json()['transactions']
+        filtered_json_response = []
         for transaction in json_response:
             transaction['transaction-time'] = datetime.strptime(transaction['transaction-time'],
                                                                 "%Y-%m-%dT%H:%M:%S.%fZ")
-        return json_response
+            if ignore_donuts:
+                if transaction['merchant'] == "Krispy Kreme Donuts" or transaction['merchant'] == "DUNKIN #336784":
+                    continue
+            filtered_json_response.append(transaction)
+        return filtered_json_response
     else:
         click.echo("Something went wrong in downloading the transactions.")
 
@@ -70,8 +75,9 @@ def get_income_and_expenditure_for_month(month, year, all_transactions):
 
 
 @click.command()
-def transactions():
-    all_transactions = get_all_transactions()
+@click.option('--ignore-donuts', is_flag=True, default=False)
+def transactions(ignore_donuts):
+    all_transactions = get_all_transactions(ignore_donuts)
     start_date = datetime(2014, 10, 01)
     end_date = datetime(2017, 01, 31)
     all_transactions_for_averages = []
