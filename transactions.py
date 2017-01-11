@@ -42,7 +42,8 @@ def get_all_transactions():
     if response.status_code == 200:
         json_response = response.json()['transactions']
         for transaction in json_response:
-            transaction['transaction-time'] = datetime.strptime(transaction['transaction-time'], "%Y-%m-%dT%H:%M:%S.%fZ")
+            transaction['transaction-time'] = datetime.strptime(transaction['transaction-time'],
+                                                                "%Y-%m-%dT%H:%M:%S.%fZ")
         return json_response
     else:
         click.echo("Something went wrong in downloading the transactions.")
@@ -60,17 +61,17 @@ def get_income_and_expenditure_for_month(month, year, all_transactions):
             if transaction['amount'] > 0:
                 # transaction is an income if amount > 0
                 income_count += 1
-                income += round(float(transaction['amount']/10000), 2)
+                income += round(float(transaction['amount'] / 10000), 2)
             else:
                 # transaction is an expenditure
                 expenditure_count += 1
-                expenditure += round(float((transaction['amount']*-1)/10000), 2)
+                expenditure += round(float((transaction['amount'] * -1) / 10000), 2)
     avg_income = 0
     avg_expenditure = 0
     if expenditure_count:
-        avg_expenditure = round(float(expenditure)/expenditure_count, 2)
+        avg_expenditure = round(float(expenditure) / expenditure_count, 2)
     if income_count:
-        avg_income = round(float(income)/income_count, 2)
+        avg_income = round(float(income) / income_count, 2)
     return {
         "income": income,
         "expenditure": expenditure,
@@ -83,9 +84,17 @@ def get_income_and_expenditure_for_month(month, year, all_transactions):
 def transactions():
     all_transactions = get_all_transactions()
     start_date = datetime(2014, 10, 01)
-    end_date = datetime(2017, 02, 01)
+    end_date = datetime(2017, 01, 31)
+    all_transactions_for_averages = []
     for date in rrule(MONTHLY, dtstart=start_date, until=end_date):
-        print "%s: %s" % (date.strftime("%Y-%m-%d"), get_income_and_expenditure_for_month(date.month, date.year, all_transactions))
+        values_for_current_month = get_income_and_expenditure_for_month(date.month, date.year, all_transactions)
+        print "%s: {'income': %s, 'expenditure': %s}" % (date.strftime("%Y-%m-%d"), values_for_current_month['income'],
+                                                         values_for_current_month['expenditure'])
+        all_transactions_for_averages.append(values_for_current_month)
+    print "Average income: %s" % round(
+        float(sum(t['income'] for t in all_transactions_for_averages)) / len(all_transactions_for_averages), 2)
+    print "Average expenditure: %s" % round(
+        float(sum(t['expenditure'] for t in all_transactions_for_averages)) / len(all_transactions_for_averages), 2)
 
 
 if __name__ == '__main__':
